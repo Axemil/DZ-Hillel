@@ -1,0 +1,1 @@
+global.plus = (a,b) => a + b;
