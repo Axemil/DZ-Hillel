@@ -1,0 +1,148 @@
+const { readdir, stat } = require("fs");
+const parseArgs = require("minimist")(process.argv.slice(2));
+const chalk = require("chalk");
+const { extname, join } = require("path");
+const { eachSeries } = require("async");
+const EventEmitter = require("events");
+const { homedir } = require("os");
+
+
+parseArgs.EXT === undefined ||
+parseArgs.color === undefined ||
+parseArgs.deep === undefined
+  ? process.exit(-1)
+  : ({ EXT, color, deep } = parseArgs);
+
+const EXT_Array = EXT.slice(1, -1).split(",");
+const color_Array = color.slice(1, -1).split(",");
+deep < 1 || !Number.isInteger(deep) ? deep = 1 : deep;
+
+class Finder extends EventEmitter {
+  constructor(colors = "gray", EXT, deep = 1, dirname = homedir()) {
+    super();
+    this.baseDir = dirname;
+    this.color_Array = colors;
+    this.EXT_Array = EXT;
+    this.deep = deep;
+
+    this.counter = 0;
+    this.filePaths = [];
+
+    this.on("started", () =>
+      this.getFiles(this.baseDir, (err, files) => {
+        this.displayFiles(files);
+      })
+    );
+
+    this.on("finish", files => displayFiles(files));
+
+    this.on('file', file =>{
+      this.filePaths.push(file);
+    })
+
+  }
+
+  getFiles(dirPath, callback) {
+    readdir(dirPath, (err, files) => {
+      if (err) return callback(err);
+
+      
+      eachSeries(
+        files,
+        (fileName, eachCallback) => {
+          let filePath = join(dirPath, fileName);
+
+          stat(filePath, (err, stat) => {
+            if (err) return eachCallback(err);
+
+            if (stat.isDirectory()) {
+              this.getFiles(filePath, (err, subDirFiles) => {
+                if (err) return eachCallback(err);
+
+                this.filePaths = this.filePaths.concat(subDirFiles);
+                eachCallback(null);
+              });
+            } else {
+              if (stat.isFile() && this.checkExtension(extname(filePath))) {
+                this.emit('file', filePath);
+              }
+
+              eachCallback(null);
+            }
+          });
+        },
+        err => {
+          callback(err, this.filePaths);
+        }
+      );
+    });
+  }
+
+  displayFiles(files) {
+    for (const file of files) {
+      if (this.counter >= this.color_Array.length) {
+        this.counter = 0;
+      }
+      let colorItem = this.color_Array[this.counter];
+      if (this.EXT_Array[0] === "") {
+        if (this.color_Array[0] === "") this.showFile(file);
+        else this.showFile(file, colorItem);
+      } else if (this.checkExtension(extname(file)))
+        this.showFile(file, colorItem);
+      this.counter++;
+    }
+  }
+
+  checkExtension(extension) {
+    for (const EXT_part of this.EXT_Array) {
+      if (extension === EXT_part) return true;
+    }
+    return false;
+  }
+
+  deepCounter(path) {
+    let counter = 0;
+    for (const symbol of path) {
+      if (symbol.match(/\\/)) counter++;
+    }
+    return counter;
+  }
+
+  showFile(file, color = "gray") {
+    if (this.deepCounter(file) <= this.deep) {
+      switch (color) {
+        case "black":
+          console.log(chalk.black(file));
+          break;
+        case "red":
+          console.log(chalk.red(file));
+          break;
+        case "green":
+          console.log(chalk.green(file));
+          break;
+        case "blue":
+          console.log(chalk.blue(file));
+          break;
+        case "yellow":
+          console.log(chalk.yellow(file));
+          break;
+        case "magenta":
+          console.log(chalk.magenta(file));
+          break;
+        case "white":
+          console.log(chalk.white(file));
+          break;
+        case "gray":
+          console.log(chalk.gray(file));
+          break;
+        default:
+          console.log(chalk.gray(file));
+          break;
+      }
+    } else return;
+  }
+}
+const baseDir = "./assets";
+const finder = new Finder(color_Array, EXT_Array, deep, baseDir);
+
+finder.emit('started');
