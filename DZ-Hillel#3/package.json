@@ -1,0 +1,17 @@
+{
+  "name": "DZ-Hillel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start:app": "node app.js --EXT=[.png,.txt] --color=[red,blue] --search=Hello --name=\\**\\.png --deep=2",
+    "start:alternative": "node app.js --EXT=[.js,.css,.txt] --color=[blue,yellow,green] --deep=2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "file-type": "^14.1.4",
+    "minimist": "^1.2.0"
+  }
+}
