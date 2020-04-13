@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start:app": "node app.js --EXT=[.png,.txt] --color=[red,blue] --search=Hello --name=\\**\\.png --deep=2",
+    "start:app": "node app.js --EXT=[.png,.txt] --color=[red,blue] --search=\\**Hello --name=\\**\\.txt --deep=2",
     "start:alternative": "node app.js --EXT=[.js,.css,.txt] --color=[blue,yellow,green] --deep=2"
   },
   "keywords": [],

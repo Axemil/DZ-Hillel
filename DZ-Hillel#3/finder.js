@@ -106,11 +106,17 @@ class Finder extends EventEmitter {
     }
     else if (
       this.checkExtension(basename(file)) &&
-      this.deepCounter(file) <= this.deep &&
-      str.indexOf(this.search) === 0
+      this.deepCounter(file) <= this.deep 
+      
     ) {
-      return file
+      
+      return [file,"Искомое слово: "+this.scanText(str)]
     }
+  }
+
+  scanText (str) {
+    const match = str.match(this.search);
+    return match[0];
   }
 
   async scanFile(rs) {
