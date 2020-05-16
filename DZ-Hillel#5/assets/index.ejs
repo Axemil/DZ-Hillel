@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%=title %></title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <h1>Main page</h1>
+
+    <ul>
+      <% messages.forEach(function(message) { %>
+      <li>
+        Id: <%= message.id %> - User: <%= message.user %> - Message: <%= message.text %> - time: <%= message.date %>
+      </li>
+      <% }); %>
+    </ul>
+  </body>
+  <html></html>
+</html>
